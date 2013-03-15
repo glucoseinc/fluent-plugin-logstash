@@ -2,6 +2,16 @@
 
 Format Fluentd records as Logstash events and re-emit.
 
+The re-emitted record conforms to logstash's 'json_event' format and is mapped from the original record in the following fashion:
+
+    {
+        '@timestamp' => time.as(ISO8601),
+        '@type' => resolve_logstash_type(tag, conf['logstash_type']),
+        '@fields'=> conf['logstash_fields'].as_dict + record.without('message'),
+        '@tags' => conf['logstash_tags'].split(' '),
+        '@message' => record['message'] if record.include? 'message',
+    }
+
 ## Config options
 
     <match **>
